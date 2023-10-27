@@ -26,7 +26,6 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-# ボットトークンを使ってアプリを初期化します
 app = App(
     signing_secret=os.environ["SLACK_SIGNING_SECRET"],
     token=os.environ["SLACK_BOT_TOKEN"],
@@ -61,7 +60,7 @@ class SlackStreamingCallbackHandler(BaseCallbackHandler):
                 self.interval = self.interval * 2
 
     def on_llm_end(self, response: LLMResult, **kwargs: Any) -> Any:
-        message_context = "OpenAI APIで生成される情報は不正確または不適切な場合がありますが、当社の見解を述べるものではありません。"
+        message_context = "OpenAI APIで生成される情報は不正確または不適切な場合があります。"
         message_blocks = [
             {"type": "section", "text": {"type": "mrkdwn", "text": self.message}},
             {"type": "divider"},
@@ -122,7 +121,7 @@ def just_ack(ack):
 
 app.event("app_mention")(ack=just_ack, lazy=[handle_mention])
 
-# ソケットモードハンドラーを使ってアプリを起動します
+# ソケットモードハンドラーを使ってアプリを起動
 if __name__ == "__main__":
     SocketModeHandler(app, os.environ["SLACK_APP_TOKEN"]).start()
 
@@ -138,5 +137,4 @@ def handler(event, context):
 
     # AWS Lambda 環境のリクエスト情報を app が処理できるよう変換してくれるアダプター
     slack_handler = SlackRequestHandler(app=app)
-    # 応答はそのまま AWS Lambda の戻り値として返せます
     return slack_handler.handle(event, context)
